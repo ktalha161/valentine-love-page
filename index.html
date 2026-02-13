@@ -18,6 +18,7 @@ body {
 h1 {
     margin-top:80px;
     font-size:3em;
+    padding:0 20px;
 }
 
 button {
@@ -31,6 +32,7 @@ button {
 #yesBtn {
     background:white;
     color:red;
+    display:none;
 }
 
 #noBtn {
@@ -40,11 +42,12 @@ button {
 
 .heart {
     position:absolute;
-    font-size:30px;
+    font-size:80px;
+    opacity:0.9;
 }
 
 #giantHeart {
-    font-size:200px;
+    font-size:220px;
     display:none;
     margin-top:100px;
 }
@@ -84,20 +87,22 @@ const burstText = document.getElementById("burstText");
 const question = document.getElementById("question");
 
 let heartCount = 0;
-const maxHearts = 200; // Adjust for how full you want screen
+let noClickCount = 0;
+const maxHearts = 60; // fills much quicker
 
-// Unlimited No clicks
 noBtn.addEventListener("click", () => {
+    noClickCount++;
+    updateQuestionText();
     addHeart();
 });
 
-// Add ONE heart each click
 function addHeart() {
     const heart = document.createElement("div");
     heart.className = "heart";
     heart.innerHTML = "❤️";
     heart.style.left = Math.random() * window.innerWidth + "px";
     heart.style.top = Math.random() * window.innerHeight + "px";
+    heart.style.transform = "rotate(" + Math.random() * 360 + "deg)";
     document.body.appendChild(heart);
 
     heartCount++;
@@ -107,7 +112,19 @@ function addHeart() {
     }
 }
 
-// When screen fills
+function updateQuestionText() {
+    if (noClickCount === 1) {
+        question.innerHTML = "Are you sure? 😢";
+    } else {
+        let text = "Are you ";
+        for (let i = 0; i < noClickCount - 1; i++) {
+            text += "really ";
+        }
+        text += "sure? 🥺";
+        question.innerHTML = text;
+    }
+}
+
 function triggerBurst() {
     noBtn.style.display = "none";
     question.style.display = "none";
@@ -120,12 +137,10 @@ function triggerBurst() {
         burstText.innerHTML =
             "Oh oo! Look what you have done 😭<br>Now you have to fix it 💔";
 
-        // Show only YES button
         yesBtn.style.display = "inline-block";
-    }, 1500);
+    }, 1200);
 }
 
-// Only after YES pressed
 yesBtn.addEventListener("click", () => {
     burstText.innerHTML = "";
     giantHeart.innerHTML = "❤️";
@@ -133,7 +148,6 @@ yesBtn.addEventListener("click", () => {
     floodLoveLanguages();
 });
 
-// Fireworks
 function startFireworks() {
     setInterval(() => {
         const firework = document.createElement("div");
@@ -146,7 +160,6 @@ function startFireworks() {
     }, 300);
 }
 
-// I love you languages (ONLY after YES)
 function floodLoveLanguages() {
     const loveTexts = [
         "I love you so much",
@@ -168,7 +181,7 @@ function floodLoveLanguages() {
         text.style.position = "absolute";
         text.style.left = Math.random() * window.innerWidth + "px";
         text.style.top = Math.random() * window.innerHeight + "px";
-        text.style.fontSize = "24px";
+        text.style.fontSize = "28px";
         text.style.color = "white";
         document.body.appendChild(text);
     }, 250);
