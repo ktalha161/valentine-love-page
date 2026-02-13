@@ -9,7 +9,7 @@
 body {
     margin: 0;
     padding: 0;
-    background: linear-gradient(135deg, #ff1e56, #ff4b2b);
+    background: radial-gradient(circle, #ff004c, #8b0000);
     font-family: Arial, sans-serif;
     overflow: hidden;
     text-align: center;
@@ -17,53 +17,50 @@ body {
 }
 
 h1 {
-    margin-top: 100px;
+    margin-top: 80px;
     font-size: 3em;
 }
 
 button {
-    padding: 15px 30px;
+    padding: 15px 35px;
     font-size: 20px;
     border: none;
     border-radius: 50px;
     cursor: pointer;
     margin: 20px;
-    transition: 0.3s;
 }
 
 #yesBtn {
-    background-color: white;
-    color: #ff1e56;
+    background: white;
+    color: red;
 }
 
 #noBtn {
-    background-color: black;
+    background: black;
     color: white;
     position: absolute;
 }
 
-.hearts {
+.heart {
     position: fixed;
-    top: -10px;
-    color: pink;
-    font-size: 20px;
-    animation: fall linear infinite;
+    font-size: 25px;
+    animation: float 6s linear infinite;
 }
 
-@keyframes fall {
-    0% {transform: translateY(0);}
-    100% {transform: translateY(100vh);}
+@keyframes float {
+    0% { transform: translateY(100vh); opacity: 1; }
+    100% { transform: translateY(-10vh); opacity: 0; }
 }
 
 .bigHeart {
-    font-size: 150px;
+    font-size: 180px;
     animation: pulse 1s infinite;
 }
 
 @keyframes pulse {
-    0% {transform: scale(1);}
-    50% {transform: scale(1.2);}
-    100% {transform: scale(1);}
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
 }
 
 .hidden {
@@ -72,8 +69,8 @@ button {
 
 .firework {
     position: fixed;
-    width: 5px;
-    height: 5px;
+    width: 6px;
+    height: 6px;
     background: yellow;
     border-radius: 50%;
     animation: explode 1s ease-out forwards;
@@ -81,7 +78,7 @@ button {
 
 @keyframes explode {
     to {
-        transform: translateY(-200px) scale(5);
+        transform: translateY(-200px) scale(6);
         opacity: 0;
     }
 }
@@ -92,86 +89,77 @@ button {
 
 <h1 id="question">Will you be mine? ❤️</h1>
 
-<button id="yesBtn">Yes 💕</button>
+<button id="yesBtn">Yes 💖</button>
 <button id="noBtn">No 😈</button>
 
-<div id="finalMessage" class="hidden">
-    <div class="bigHeart">❤️</div>
-    <h1>I LOVE YOU SO MUCH</h1>
-    <div id="languages"></div>
+<div id="burstSection" class="hidden">
+    <div class="bigHeart" id="mainHeart">💔</div>
+    <h1 id="burstText"></h1>
 </div>
 
 <script>
-let noClickCount = 0;
 const noBtn = document.getElementById("noBtn");
 const yesBtn = document.getElementById("yesBtn");
 const question = document.getElementById("question");
-const finalMessage = document.getElementById("finalMessage");
-const languagesDiv = document.getElementById("languages");
+const burstSection = document.getElementById("burstSection");
+const burstText = document.getElementById("burstText");
+const mainHeart = document.getElementById("mainHeart");
+
+let heartCount = 0;
+const maxHearts = 40;
 
 noBtn.addEventListener("click", () => {
-    noClickCount++;
+    moveButton();
+    addHeart();
+    heartCount++;
 
-    if (noClickCount < 5) {
-        moveButton();
-    } else {
-        triggerLove();
+    if (heartCount >= maxHearts) {
+        triggerBurst();
     }
 });
 
 yesBtn.addEventListener("click", triggerLove);
 
 function moveButton() {
-    const x = Math.random() * (window.innerWidth - 100);
-    const y = Math.random() * (window.innerHeight - 100);
+    const x = Math.random() * (window.innerWidth - 120);
+    const y = Math.random() * (window.innerHeight - 80);
     noBtn.style.left = x + "px";
     noBtn.style.top = y + "px";
 }
 
-function triggerLove() {
+function addHeart() {
+    const heart = document.createElement("div");
+    heart.classList.add("heart");
+    heart.innerHTML = "❤️";
+    heart.style.left = Math.random() * window.innerWidth + "px";
+    document.body.appendChild(heart);
+}
+
+function triggerBurst() {
     question.classList.add("hidden");
-    yesBtn.classList.add("hidden");
     noBtn.classList.add("hidden");
-    finalMessage.classList.remove("hidden");
+    yesBtn.classList.add("hidden");
 
-    startHearts();
-    showLanguages();
+    burstSection.classList.remove("hidden");
+
+    setTimeout(() => {
+        mainHeart.innerHTML = "💥";
+        burstText.innerHTML = "Oh oo!! Look what you have done 😭<br>Now you have to love me to fix my heart 💔";
+        
+        setTimeout(() => {
+            mainHeart.innerHTML = "💔";
+            yesBtn.classList.remove("hidden");
+        }, 2000);
+
+    }, 1000);
+}
+
+function triggerLove() {
+    burstText.innerHTML = "";
+    mainHeart.innerHTML = "❤️";
+
     startFireworks();
-}
-
-function startHearts() {
-    setInterval(() => {
-        const heart = document.createElement("div");
-        heart.classList.add("hearts");
-        heart.innerHTML = "❤️";
-        heart.style.left = Math.random() * window.innerWidth + "px";
-        heart.style.animationDuration = (Math.random() * 3 + 2) + "s";
-        document.body.appendChild(heart);
-
-        setTimeout(() => heart.remove(), 5000);
-    }, 200);
-}
-
-function showLanguages() {
-    const loveTexts = [
-        "I love you",
-        "Te amo",
-        "Je t’aime",
-        "Ich liebe dich",
-        "Ti amo",
-        "Main tumse pyar karta hoon",
-        "أنا أحبك",
-        "Saranghae",
-        "Aishiteru",
-        "Eu te amo",
-        "Я тебя люблю"
-    ];
-
-    loveTexts.forEach(text => {
-        const p = document.createElement("p");
-        p.innerText = text;
-        languagesDiv.appendChild(p);
-    });
+    floodLoveLanguages();
 }
 
 function startFireworks() {
@@ -183,6 +171,28 @@ function startFireworks() {
         document.body.appendChild(firework);
 
         setTimeout(() => firework.remove(), 1000);
+    }, 300);
+}
+
+function floodLoveLanguages() {
+    const loveTexts = [
+        "I love you", "Te amo", "Je t’aime",
+        "Ich liebe dich", "Ti amo",
+        "Main tumse pyar karta hoon",
+        "أنا أحبك", "Saranghae",
+        "Aishiteru", "Eu te amo",
+        "Я тебя люблю"
+    ];
+
+    setInterval(() => {
+        const text = document.createElement("div");
+        text.innerHTML = loveTexts[Math.floor(Math.random() * loveTexts.length)];
+        text.style.position = "fixed";
+        text.style.left = Math.random() * window.innerWidth + "px";
+        text.style.top = Math.random() * window.innerHeight + "px";
+        text.style.fontSize = "24px";
+        text.style.color = "white";
+        document.body.appendChild(text);
     }, 300);
 }
 </script>
