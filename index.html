@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,64 +7,58 @@
 
 <style>
 body {
-    margin: 0;
-    padding: 0;
-    background: radial-gradient(circle, #ff004c, #8b0000);
+    margin:0;
+    overflow:hidden;
     font-family: Arial, sans-serif;
-    overflow: hidden;
-    text-align: center;
-    color: white;
+    text-align:center;
+    background: radial-gradient(circle, #ff004c, #7a0000);
+    color:white;
 }
 
 h1 {
-    margin-top: 80px;
-    font-size: 3em;
+    margin-top:80px;
+    font-size:3em;
 }
 
 button {
-    padding: 15px 35px;
-    font-size: 20px;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    margin: 20px;
+    padding:15px 35px;
+    font-size:20px;
+    border:none;
+    border-radius:50px;
+    cursor:pointer;
 }
 
 #yesBtn {
-    background: white;
-    color: red;
+    background:white;
+    color:red;
 }
 
 #noBtn {
-    background: black;
-    color: white;
-    position: absolute;
+    background:black;
+    color:white;
+    position:absolute;
 }
 
-.heart {
-    position: fixed;
-    font-size: 25px;
-    animation: float 6s linear infinite;
+.heartGrid {
+    position:fixed;
+    font-size:30px;
 }
 
-@keyframes float {
-    0% { transform: translateY(100vh); opacity: 1; }
-    100% { transform: translateY(-10vh); opacity: 0; }
+#giantHeart {
+    font-size:200px;
+    display:none;
 }
 
-.bigHeart {
-    font-size: 180px;
-    animation: pulse 1s infinite;
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    50% { transform: translateX(10px); }
+    75% { transform: translateX(-10px); }
+    100% { transform: translateX(0); }
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-}
-
-.hidden {
-    display: none;
+.shake {
+    animation: shake 0.5s;
 }
 
 .firework {
@@ -88,37 +82,29 @@ button {
 <body>
 
 <h1 id="question">Will you be mine? ❤️</h1>
-
 <button id="yesBtn">Yes 💖</button>
 <button id="noBtn">No 😈</button>
 
-<div id="burstSection" class="hidden">
-    <div class="bigHeart" id="mainHeart">💔</div>
-    <h1 id="burstText"></h1>
-</div>
+<div id="giantHeart">❤️</div>
+<h1 id="burstText"></h1>
 
 <script>
 const noBtn = document.getElementById("noBtn");
 const yesBtn = document.getElementById("yesBtn");
-const question = document.getElementById("question");
-const burstSection = document.getElementById("burstSection");
+const giantHeart = document.getElementById("giantHeart");
 const burstText = document.getElementById("burstText");
-const mainHeart = document.getElementById("mainHeart");
+const question = document.getElementById("question");
 
 let heartCount = 0;
-const maxHearts = 40;
+const maxHearts = 120;
 
+noBtn.addEventListener("mouseover", moveButton);
 noBtn.addEventListener("click", () => {
     moveButton();
-    addHeart();
-    heartCount++;
-
-    if (heartCount >= maxHearts) {
-        triggerBurst();
-    }
+    fillScreen();
 });
 
-yesBtn.addEventListener("click", triggerLove);
+yesBtn.addEventListener("click", finalLove);
 
 function moveButton() {
     const x = Math.random() * (window.innerWidth - 120);
@@ -127,39 +113,53 @@ function moveButton() {
     noBtn.style.top = y + "px";
 }
 
-function addHeart() {
+function fillScreen() {
     const heart = document.createElement("div");
-    heart.classList.add("heart");
+    heart.className = "heartGrid";
     heart.innerHTML = "❤️";
     heart.style.left = Math.random() * window.innerWidth + "px";
+    heart.style.top = Math.random() * window.innerHeight + "px";
     document.body.appendChild(heart);
+
+    heartCount++;
+
+    if (heartCount >= maxHearts) {
+        explodeHeart();
+    }
 }
 
-function triggerBurst() {
-    question.classList.add("hidden");
-    noBtn.classList.add("hidden");
-    yesBtn.classList.add("hidden");
-
-    burstSection.classList.remove("hidden");
+function explodeHeart() {
+    document.body.classList.add("shake");
 
     setTimeout(() => {
-        mainHeart.innerHTML = "💥";
+        document.body.innerHTML = "";
+        document.body.appendChild(giantHeart);
+        document.body.appendChild(burstText);
+
+        giantHeart.style.display = "block";
+        giantHeart.innerHTML = "💥";
+
         burstText.innerHTML = "Oh oo!! Look what you have done 😭<br>Now you have to love me to fix my heart 💔";
-        
+
         setTimeout(() => {
-            mainHeart.innerHTML = "💔";
-            yesBtn.classList.remove("hidden");
+            giantHeart.innerHTML = "💔";
+            document.body.appendChild(yesBtn);
         }, 2000);
 
-    }, 1000);
+    }, 500);
 }
 
-function triggerLove() {
-    burstText.innerHTML = "";
-    mainHeart.innerHTML = "❤️";
+function finalLove() {
+    document.body.innerHTML = "";
+
+    const heart = document.createElement("div");
+    heart.style.fontSize = "200px";
+    heart.style.animation = "pulse 1s infinite";
+    heart.innerHTML = "❤️";
+    document.body.appendChild(heart);
 
     startFireworks();
-    floodLoveLanguages();
+    floodLove();
 }
 
 function startFireworks() {
@@ -174,7 +174,7 @@ function startFireworks() {
     }, 300);
 }
 
-function floodLoveLanguages() {
+function floodLove() {
     const loveTexts = [
         "I love you", "Te amo", "Je t’aime",
         "Ich liebe dich", "Ti amo",
@@ -193,7 +193,7 @@ function floodLoveLanguages() {
         text.style.fontSize = "24px";
         text.style.color = "white";
         document.body.appendChild(text);
-    }, 300);
+    }, 200);
 }
 </script>
 
