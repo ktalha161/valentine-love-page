@@ -27,12 +27,12 @@ button {
     border:none;
     border-radius:50px;
     cursor:pointer;
+    margin:10px;
 }
 
 #yesBtn {
     background:white;
     color:red;
-    display:none;
 }
 
 #noBtn {
@@ -42,14 +42,55 @@ button {
 
 .heart {
     position:absolute;
-    font-size:80px;
-    opacity:0.9;
+    font-size:90px;
+    opacity:0.95;
 }
 
 #giantHeart {
     font-size:220px;
     display:none;
     margin-top:100px;
+}
+
+/* Red Flash */
+#flash {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:red;
+    opacity:0;
+    pointer-events:none;
+}
+
+.flashActive {
+    animation: redFlash 0.4s ease-in-out;
+}
+
+@keyframes redFlash {
+    0% { opacity:0; }
+    50% { opacity:0.7; }
+    100% { opacity:0; }
+}
+
+/* Shake */
+@keyframes violentShake {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-10px, -10px) rotate(-2deg); }
+    20% { transform: translate(10px, 10px) rotate(2deg); }
+    30% { transform: translate(-15px, 5px) rotate(-3deg); }
+    40% { transform: translate(15px, -5px) rotate(3deg); }
+    50% { transform: translate(-10px, 10px) rotate(-2deg); }
+    60% { transform: translate(10px, -10px) rotate(2deg); }
+    70% { transform: translate(-8px, 8px) rotate(-1deg); }
+    80% { transform: translate(8px, -8px) rotate(1deg); }
+    90% { transform: translate(-5px, 5px) rotate(-1deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.shake {
+    animation: violentShake 0.8s ease-in-out;
 }
 
 .firework {
@@ -79,23 +120,33 @@ button {
 <div id="giantHeart">❤️</div>
 <h1 id="burstText"></h1>
 
+<div id="flash"></div>
+
+<!-- Sound Effects -->
+<audio id="heartbeatSound" src="https://assets.mixkit.co/sfx/preview/mixkit-heart-beat-555.mp3"></audio>
+<audio id="crackSound" src="https://assets.mixkit.co/sfx/preview/mixkit-wood-crack-1145.mp3"></audio>
+<audio id="explosionSound" src="https://assets.mixkit.co/sfx/preview/mixkit-explosion-impact-1684.mp3"></audio>
+
 <script>
 const noBtn = document.getElementById("noBtn");
 const yesBtn = document.getElementById("yesBtn");
 const giantHeart = document.getElementById("giantHeart");
 const burstText = document.getElementById("burstText");
 const question = document.getElementById("question");
+const flash = document.getElementById("flash");
 
 let heartCount = 0;
 let noClickCount = 0;
-const maxHearts = 60; // fills much quicker
+const maxHearts = 55;
 
+// NO click
 noBtn.addEventListener("click", () => {
     noClickCount++;
     updateQuestionText();
     addHeart();
 });
 
+// Add heart
 function addHeart() {
     const heart = document.createElement("div");
     heart.className = "heart";
@@ -112,6 +163,7 @@ function addHeart() {
     }
 }
 
+// Progressive question text
 function updateQuestionText() {
     if (noClickCount === 1) {
         question.innerHTML = "Are you sure? 😢";
@@ -125,22 +177,59 @@ function updateQuestionText() {
     }
 }
 
+// Dramatic Burst Sequence
 function triggerBurst() {
+
+    const heartbeat = document.getElementById("heartbeatSound");
+    const crack = document.getElementById("crackSound");
+    const explosion = document.getElementById("explosionSound");
+
+    document.querySelectorAll(".heart").forEach(h => h.remove());
+
     noBtn.style.display = "none";
     question.style.display = "none";
 
-    giantHeart.style.display = "block";
-    giantHeart.innerHTML = "❤️";
+    // Vibration
+    if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200]);
+    }
+
+    // Heartbeat
+    heartbeat.play();
+
+    // Red flash
+    flash.classList.add("flashActive");
 
     setTimeout(() => {
-        giantHeart.innerHTML = "💥";
-        burstText.innerHTML =
-            "Oh oo! Look what you have done 😭<br>Now you have to fix it 💔";
 
-        yesBtn.style.display = "inline-block";
-    }, 1200);
+        crack.play();
+        document.body.classList.add("shake");
+
+        setTimeout(() => {
+
+            document.body.classList.remove("shake");
+
+            giantHeart.style.display = "block";
+            giantHeart.innerHTML = "❤️";
+
+            setTimeout(() => {
+
+                explosion.play();
+                giantHeart.innerHTML = "💥";
+
+                burstText.innerHTML =
+                    "Oh oo! Look what you have done 😭<br>Now you have to fix it 💔";
+
+                yesBtn.style.display = "inline-block";
+
+            }, 800);
+
+        }, 800);
+
+    }, 400);
 }
 
+// YES click
 yesBtn.addEventListener("click", () => {
     burstText.innerHTML = "";
     giantHeart.innerHTML = "❤️";
@@ -148,6 +237,7 @@ yesBtn.addEventListener("click", () => {
     floodLoveLanguages();
 });
 
+// Fireworks
 function startFireworks() {
     setInterval(() => {
         const firework = document.createElement("div");
@@ -155,11 +245,11 @@ function startFireworks() {
         firework.style.left = Math.random() * window.innerWidth + "px";
         firework.style.bottom = "0px";
         document.body.appendChild(firework);
-
         setTimeout(() => firework.remove(), 1000);
     }, 300);
 }
 
+// Love Flood
 function floodLoveLanguages() {
     const loveTexts = [
         "I love you so much",
