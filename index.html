@@ -15,6 +15,22 @@ body {
     color:white;
 }
 
+/* Dark Vignette */
+#vignette {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    background: radial-gradient(circle at center, 
+        rgba(0,0,0,0) 40%, 
+        rgba(0,0,0,0.5) 70%, 
+        rgba(0,0,0,0.85) 100%);
+    opacity:0;
+    transition: opacity 1s ease;
+}
+
 h1 {
     margin-top:80px;
     font-size:3em;
@@ -50,6 +66,20 @@ button {
     font-size:220px;
     display:none;
     margin-top:100px;
+    transition: transform 0.2s;
+}
+
+/* Crack Animation */
+@keyframes crackEffect {
+    0% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.1) rotate(-2deg); }
+    50% { transform: scale(0.95) rotate(2deg); }
+    75% { transform: scale(1.05) rotate(-1deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+.crack {
+    animation: crackEffect 0.4s ease-in-out 3;
 }
 
 /* Red Flash */
@@ -77,15 +107,10 @@ button {
 /* Shake */
 @keyframes violentShake {
     0% { transform: translate(0, 0) rotate(0deg); }
-    10% { transform: translate(-10px, -10px) rotate(-2deg); }
-    20% { transform: translate(10px, 10px) rotate(2deg); }
-    30% { transform: translate(-15px, 5px) rotate(-3deg); }
-    40% { transform: translate(15px, -5px) rotate(3deg); }
-    50% { transform: translate(-10px, 10px) rotate(-2deg); }
-    60% { transform: translate(10px, -10px) rotate(2deg); }
-    70% { transform: translate(-8px, 8px) rotate(-1deg); }
-    80% { transform: translate(8px, -8px) rotate(1deg); }
-    90% { transform: translate(-5px, 5px) rotate(-1deg); }
+    20% { transform: translate(-12px, 12px) rotate(-2deg); }
+    40% { transform: translate(12px, -12px) rotate(2deg); }
+    60% { transform: translate(-10px, 10px) rotate(-1deg); }
+    80% { transform: translate(10px, -10px) rotate(1deg); }
     100% { transform: translate(0, 0) rotate(0deg); }
 }
 
@@ -121,8 +146,8 @@ button {
 <h1 id="burstText"></h1>
 
 <div id="flash"></div>
+<div id="vignette"></div>
 
-<!-- Sound Effects -->
 <audio id="heartbeatSound" src="https://assets.mixkit.co/sfx/preview/mixkit-heart-beat-555.mp3"></audio>
 <audio id="crackSound" src="https://assets.mixkit.co/sfx/preview/mixkit-wood-crack-1145.mp3"></audio>
 <audio id="explosionSound" src="https://assets.mixkit.co/sfx/preview/mixkit-explosion-impact-1684.mp3"></audio>
@@ -134,19 +159,18 @@ const giantHeart = document.getElementById("giantHeart");
 const burstText = document.getElementById("burstText");
 const question = document.getElementById("question");
 const flash = document.getElementById("flash");
+const vignette = document.getElementById("vignette");
 
 let heartCount = 0;
 let noClickCount = 0;
 const maxHearts = 55;
 
-// NO click
 noBtn.addEventListener("click", () => {
     noClickCount++;
     updateQuestionText();
     addHeart();
 });
 
-// Add heart
 function addHeart() {
     const heart = document.createElement("div");
     heart.className = "heart";
@@ -158,12 +182,14 @@ function addHeart() {
 
     heartCount++;
 
+    // Gradually darken edges
+    vignette.style.opacity = heartCount / maxHearts;
+
     if (heartCount >= maxHearts) {
         triggerBurst();
     }
 }
 
-// Progressive question text
 function updateQuestionText() {
     if (noClickCount === 1) {
         question.innerHTML = "Are you sure? 😢";
@@ -177,7 +203,6 @@ function updateQuestionText() {
     }
 }
 
-// Dramatic Burst Sequence
 function triggerBurst() {
 
     const heartbeat = document.getElementById("heartbeatSound");
@@ -185,51 +210,38 @@ function triggerBurst() {
     const explosion = document.getElementById("explosionSound");
 
     document.querySelectorAll(".heart").forEach(h => h.remove());
-
     noBtn.style.display = "none";
     question.style.display = "none";
 
-    // Vibration
     if (navigator.vibrate) {
         navigator.vibrate([200, 100, 200]);
     }
 
-    // Heartbeat
     heartbeat.play();
-
-    // Red flash
     flash.classList.add("flashActive");
 
     setTimeout(() => {
 
+        giantHeart.style.display = "block";
+        giantHeart.classList.add("crack");
         crack.play();
-        document.body.classList.add("shake");
 
         setTimeout(() => {
 
-            document.body.classList.remove("shake");
+            explosion.play();
+            document.body.classList.add("shake");
+            giantHeart.innerHTML = "💥";
 
-            giantHeart.style.display = "block";
-            giantHeart.innerHTML = "❤️";
+            burstText.innerHTML =
+                "Oh oo! Look what you have done 😭<br>Now you have to fix it 💔";
 
-            setTimeout(() => {
+            yesBtn.style.display = "inline-block";
 
-                explosion.play();
-                giantHeart.innerHTML = "💥";
-
-                burstText.innerHTML =
-                    "Oh oo! Look what you have done 😭<br>Now you have to fix it 💔";
-
-                yesBtn.style.display = "inline-block";
-
-            }, 800);
-
-        }, 800);
+        }, 1200);
 
     }, 400);
 }
 
-// YES click
 yesBtn.addEventListener("click", () => {
     burstText.innerHTML = "";
     giantHeart.innerHTML = "❤️";
@@ -237,7 +249,6 @@ yesBtn.addEventListener("click", () => {
     floodLoveLanguages();
 });
 
-// Fireworks
 function startFireworks() {
     setInterval(() => {
         const firework = document.createElement("div");
@@ -249,7 +260,6 @@ function startFireworks() {
     }, 300);
 }
 
-// Love Flood
 function floodLoveLanguages() {
     const loveTexts = [
         "I love you so much",
