@@ -36,29 +36,17 @@ button {
 #noBtn {
     background:black;
     color:white;
-    position:absolute;
 }
 
-.heartGrid {
-    position:fixed;
+.heart {
+    position:absolute;
     font-size:30px;
 }
 
 #giantHeart {
     font-size:200px;
     display:none;
-}
-
-@keyframes shake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-10px); }
-    50% { transform: translateX(10px); }
-    75% { transform: translateX(-10px); }
-    100% { transform: translateX(0); }
-}
-
-.shake {
-    animation: shake 0.5s;
+    margin-top:100px;
 }
 
 .firework {
@@ -96,26 +84,17 @@ const burstText = document.getElementById("burstText");
 const question = document.getElementById("question");
 
 let heartCount = 0;
-const maxHearts = 120;
+const maxHearts = 200; // Adjust for how full you want screen
 
-noBtn.addEventListener("mouseover", moveButton);
+// Unlimited No clicks
 noBtn.addEventListener("click", () => {
-    moveButton();
-    fillScreen();
+    addHeart();
 });
 
-yesBtn.addEventListener("click", finalLove);
-
-function moveButton() {
-    const x = Math.random() * (window.innerWidth - 120);
-    const y = Math.random() * (window.innerHeight - 80);
-    noBtn.style.left = x + "px";
-    noBtn.style.top = y + "px";
-}
-
-function fillScreen() {
+// Add ONE heart each click
+function addHeart() {
     const heart = document.createElement("div");
-    heart.className = "heartGrid";
+    heart.className = "heart";
     heart.innerHTML = "❤️";
     heart.style.left = Math.random() * window.innerWidth + "px";
     heart.style.top = Math.random() * window.innerHeight + "px";
@@ -124,44 +103,37 @@ function fillScreen() {
     heartCount++;
 
     if (heartCount >= maxHearts) {
-        explodeHeart();
+        triggerBurst();
     }
 }
 
-function explodeHeart() {
-    document.body.classList.add("shake");
+// When screen fills
+function triggerBurst() {
+    noBtn.style.display = "none";
+    question.style.display = "none";
+
+    giantHeart.style.display = "block";
+    giantHeart.innerHTML = "❤️";
 
     setTimeout(() => {
-        document.body.innerHTML = "";
-        document.body.appendChild(giantHeart);
-        document.body.appendChild(burstText);
-
-        giantHeart.style.display = "block";
         giantHeart.innerHTML = "💥";
+        burstText.innerHTML =
+            "Oh oo! Look what you have done 😭<br>Now you have to fix it 💔";
 
-        burstText.innerHTML = "Oh oo!! Look what you have done 😭<br>Now you have to love me to fix my heart 💔";
-
-        setTimeout(() => {
-            giantHeart.innerHTML = "💔";
-            document.body.appendChild(yesBtn);
-        }, 2000);
-
-    }, 500);
+        // Show only YES button
+        yesBtn.style.display = "inline-block";
+    }, 1500);
 }
 
-function finalLove() {
-    document.body.innerHTML = "";
-
-    const heart = document.createElement("div");
-    heart.style.fontSize = "200px";
-    heart.style.animation = "pulse 1s infinite";
-    heart.innerHTML = "❤️";
-    document.body.appendChild(heart);
-
+// Only after YES pressed
+yesBtn.addEventListener("click", () => {
+    burstText.innerHTML = "";
+    giantHeart.innerHTML = "❤️";
     startFireworks();
-    floodLove();
-}
+    floodLoveLanguages();
+});
 
+// Fireworks
 function startFireworks() {
     setInterval(() => {
         const firework = document.createElement("div");
@@ -174,26 +146,32 @@ function startFireworks() {
     }, 300);
 }
 
-function floodLove() {
+// I love you languages (ONLY after YES)
+function floodLoveLanguages() {
     const loveTexts = [
-        "I love you", "Te amo", "Je t’aime",
-        "Ich liebe dich", "Ti amo",
-        "Main tumse pyar karta hoon",
-        "أنا أحبك", "Saranghae",
-        "Aishiteru", "Eu te amo",
-        "Я тебя люблю"
+        "I love you so much",
+        "Te amo muchísimo",
+        "Je t’aime beaucoup",
+        "Ich liebe dich sehr",
+        "Ti amo tanto",
+        "Main tumse bohat pyar karta hoon",
+        "أنا أحبك كثيراً",
+        "Saranghae neomu",
+        "Aishiteru yo",
+        "Eu te amo muito",
+        "Я тебя очень люблю"
     ];
 
     setInterval(() => {
         const text = document.createElement("div");
         text.innerHTML = loveTexts[Math.floor(Math.random() * loveTexts.length)];
-        text.style.position = "fixed";
+        text.style.position = "absolute";
         text.style.left = Math.random() * window.innerWidth + "px";
         text.style.top = Math.random() * window.innerHeight + "px";
         text.style.fontSize = "24px";
         text.style.color = "white";
         document.body.appendChild(text);
-    }, 200);
+    }, 250);
 }
 </script>
 
